@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  # FastAPI Application
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: xray-fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./src:/app/src
+      - ./models:/app/models
+      - ./data:/app/data
+      - logs_volume:/app/logs
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+      - MODEL_PATH=/app/models/best_model.pth
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://xray_user:xray_password@db:5432/xray_db
+    depends_on:
+      - db
+      - redis
+    networks:
+      - xray-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: xray-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - static_volume:/app/backend/static:ro
+    depends_on:
+      - web
+    networks:
+      - xray-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: xray-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: xray_db
+      POSTGRES_USER: xray_user
+      POSTGRES_PASSWORD: xray_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - xray-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xray_user -d xray_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: xray-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_password
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - xray-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "redis_password", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Streamlit Alternative UI
+  streamlit:
+    build:
+      context: .
+      dockerfile: streamlit.Dockerfile
+    container_name: xray-streamlit
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/app
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - web
+    networks:
+      - xray-network
+
+  # Jupyter Notebook for Development
+  jupyter:
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    container_name: xray-jupyter
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/app
+      - jupyter_data:/home/jovyan/work
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=xray_token
+    networks:
+      - xray-network
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: xray-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - xray-network
+
+  # Grafana for Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: xray-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - xray-network
+
+volumes:
+  static_volume:
+  postgres_data:
+  redis_data:
+  logs_volume:
+  jupyter_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  xray-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

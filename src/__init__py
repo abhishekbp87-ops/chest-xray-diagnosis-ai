@@ -1,0 +1,28 @@
+"""
+Chest X-ray AI Diagnostics Package
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A comprehensive machine learning package for chest X-ray analysis.
+"""
+
+__version__ = "1.0.0"
+__author__ = "Your Name"
+__email__ = "your.email@example.com"
+
+# Import main modules
+from . import medical_model
+from . import data_processor
+from . import infer
+
+# Export key functions
+from .infer import predict_image
+from .medical_model import MedicalNet, load_model
+from .data_processor import preprocess_image, XRayDataset
+
+__all__ = [
+    "predict_image",
+    "MedicalNet", 
+    "load_model",
+    "preprocess_image",
+    "XRayDataset",
+]

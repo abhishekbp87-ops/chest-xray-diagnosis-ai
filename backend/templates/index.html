@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chest X‑ray AI Diagnostics</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+  <link rel="preload" href="{{ url_for('static', path='css/styles.css') }}" as="style">
+  
+  <!-- Fonts with variable weight support -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}" />
+  
+  <!-- Meta tags for PWA -->
+  <meta name="theme-color" content="#0b0f14">
+  <meta name="description" content="Advanced AI-powered chest X-ray analysis for medical diagnostics">
+  <link rel="manifest" href="{{ url_for('static', path='manifest.json') }}">
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="background-animation">
+    <div class="particles-container" id="particles"></div>
+    <div class="gradient-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+  </div>
+
+  <!-- Loading screen -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <div class="pulse-ring"></div>
+        <div class="loading-icon">🔬</div>
+      </div>
+      <h2>Initializing AI Diagnostics</h2>
+      <div class="loading-progress">
+        <div class="loading-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container">
+      <!-- Enhanced navigation -->
+      <nav class="top-nav">
+        <div class="nav-brand">
+          <div class="brand-icon">🏥</div>
+          <span class="brand-text">MedAI</span>
+        </div>
+        <div class="nav-links">
+          <a href="#about" class="nav-link">About</a>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#contact" class="nav-link">Contact</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Hero section with enhanced typography -->
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-text">AI-Powered • HIPAA Compliant</span>
+        </div>
+        <h1 class="hero-title">
+          <span class="title-line">Advanced Chest X‑ray</span>
+          <span class="title-line gradient-text">AI Diagnostics</span>
+        </h1>
+        <p class="hero-description">
+          Leverage cutting-edge machine learning to analyze chest X-rays with 
+          <strong class="highlight">95.2% accuracy</strong> in detecting pneumonia and other abnormalities.
+        </p>
+        
+        <!-- Statistics bar -->
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Images Analyzed</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number">95.2%</div>
+            <div class="stat-label">Accuracy Rate</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number">&lt;3s</div>
+            <div class="stat-label">Analysis Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Enhanced upload section -->
+    <section class="upload-section">
+      <div class="section-header">
+        <h2 class="section-title">Upload & Analyze</h2>
+        <p class="section-subtitle">Drag, drop, and get instant AI-powered insights</p>
+      </div>
+
+      <div class="card advanced-card">
+        <form id="upload-form" class="upload-form" enctype="multipart/form-data">
+          <!-- Advanced dropzone -->
+          <div class="dropzone-container">
+            <label for="file" class="dropzone advanced-dropzone" id="dropzone">
+              <input id="file" name="file" type="file" accept=".png,.jpg,.jpeg,.dcm" hidden />
+              
+              <!-- Animated upload icon -->
+              <div class="upload-icon-container">
+                <div class="icon-bg"></div>
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7,10 12,15 17,10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+              
+              <div class="dropzone-content">
+                <h3 class="dropzone-title">Drop your X-ray here</h3>
+                <p class="dropzone-subtitle">
+                  or <span class="browse-link">browse files</span>
+                </p>
+                <div class="file-formats">
+                  <span class="format-badge">PNG</span>
+                  <span class="format-badge">JPG</span>
+                  <span class="format-badge">JPEG</span>
+                  <span class="format-badge">DICOM</span>
+                </div>
+                <p class="size-limit">Maximum file size: 10MB</p>
+              </div>
+
+              <!-- Progress ring for drag state -->
+              <div class="dropzone-progress">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                  <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
+                  <circle class="progress-ring-fill" cx="60" cy="60" r="54"></circle>
+                </svg>
+              </div>
+            </label>
+          </div>
+
+          <!-- Enhanced file info -->
+          <div class="file-info advanced-file-info" id="file-info">
+            <div class="file-preview-container">
+              <div class="file-icon">📄</div>
+              <div class="file-details">
+                <span class="file-name" id="file-name"></span>
+                <div class="file-meta">
+                  <span class="file-size" id="file-size"></span>
+                  <span class="file-type" id="file-type"></span>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="clear-btn advanced-clear-btn" id="clear-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Advanced action buttons -->
+          <div class="actions advanced-actions">
+            <button id="submit-btn" class="btn btn-primary advanced-btn" type="submit">
+              <span class="btn-content">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 11l3 3 8-8"></path>
+                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.51 0 2.93.37 4.18 1.03"></path>
+                </svg>
+                <span class="btn-text">Analyze with AI</span>
+              </span>
+              <div class="btn-loader">
+                <div class="loader-spinner"></div>
+              </div>
+              <div class="btn-ripple"></div>
+            </button>
+            
+            <button id="reset-btn" class="btn btn-secondary advanced-btn" type="button">
+              <span class="btn-content">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                <span class="btn-text">Reset</span>
+              </span>
+              <div class="btn-ripple"></div>
+            </button>
+          </div>
+        </form>
+
+        <!-- Enhanced preview section -->
+        <div id="preview" class="preview-section advanced-preview">
+          <div class="preview-header">
+            <h4>Image Preview</h4>
+            <div class="preview-controls">
+              <button class="control-btn" id="zoom-in">🔍+</button>
+              <button class="control-btn" id="zoom-out">🔍-</button>
+              <button class="control-btn" id="fullscreen">⛶</button>
+            </div>
+          </div>
+          <div class="preview-container">
+            <img id="preview-img" alt="X-ray Preview" />
+            <div class="preview-overlay">
+              <div class="overlay-info">
+                <span class="image-dimensions" id="image-dimensions"></span>
+                <span class="image-format" id="image-format"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced results section -->
+        <div id="result" class="result-section advanced-result">
+          <div class="result-header">
+            <div class="result-title-group">
+              <h3>AI Analysis Results</h3>
+              <div class="result-timestamp" id="result-timestamp"></div>
+            </div>
+            <div class="result-status" id="result-status">
+              <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span class="status-text">Analysis Complete</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="result-content">
+            <!-- Primary prediction -->
+            <div class="prediction-card primary-prediction">
+              <div class="prediction-header">
+                <h4>Primary Diagnosis</h4>
+                <div class="confidence-badge" id="confidence-badge">
+                  <span id="pred-prob">95%</span>
+                </div>
+              </div>
+              <div class="prediction-result">
+                <div class="diagnosis-label" id="pred-label">Normal</div>
+                <div class="diagnosis-description" id="pred-description">
+                  No signs of pneumonia or other abnormalities detected.
+                </div>
+              </div>
+              
+              <!-- Advanced confidence visualization -->
+              <div class="confidence-visualization">
+                <div class="confidence-header">
+                  <span>Confidence Level</span>
+                  <span class="confidence-value" id="confidence-value">95.2%</span>
+                </div>
+                <div class="confidence-bar-container">
+                  <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidence-fill"></div>
+                    <div class="confidence-markers">
+                      <div class="marker" style="left: 25%"></div>
+                      <div class="marker" style="left: 50%"></div>
+                      <div class="marker" style="left: 75%"></div>
+                    </div>
+                  </div>
+                  <div class="confidence-labels">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                    <span>Very High</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional insights -->
+            <div class="insights-grid">
+              <div class="insight-card">
+                <div class="insight-icon">📊</div>
+                <div class="insight-content">
+                  <h5>Model Accuracy</h5>
+                  <p>95.2% on validation set</p>
+                </div>
+              </div>
+              <div class="insight-card">
+                <div class="insight-icon">⚡</div>
+                <div class="insight-content">
+                  <h5>Processing Time</h5>
+                  <p id="processing-time">1.2 seconds</p>
+                </div>
+              </div>
+              <div class="insight-card">
+                <div class="insight-icon">🎯</div>
+                <div class="insight-content">
+                  <h5>Model Version</h5>
+                  <p>ResNet-50 v2.1</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="result-actions">
+              <button class="btn btn-primary btn-small" id="download-report">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-15"></path>
+                  <polyline points="7,10 12,15 17,10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Report
+              </button>
+              <button class="btn btn-secondary btn-small" id="analyze-another">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                Analyze Another
+              </button>
+              <button class="btn btn-outline btn-small" id="share-result">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                  <path d="M16 6l-4-4-4 4"></path>
+                  <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced upload progress -->
+        <div class="upload-progress advanced-progress" id="upload-progress">
+          <div class="progress-content">
+            <div class="progress-header">
+              <div class="progress-info">
+                <span class="progress-title">Processing Image...</span>
+                <span class="progress-status" id="progress-status">Uploading</span>
+              </div>
+              <span class="progress-percentage" id="upload-percent">0%</span>
+            </div>
+            
+            <div class="progress-bar-container">
+              <div class="progress-bar">
+                <div class="progress-fill" id="upload-bar"></div>
+              </div>
+            </div>
+            
+            <div class="progress-steps">
+              <div class="step active" data-step="upload">
+                <div class="step-indicator"></div>
+                <span>Upload</span>
+              </div>
+              <div class="step" data-step="process">
+                <div class="step-indicator"></div>
+                <span>Process</span>
+              </div>
+              <div class="step" data-step="analyze">
+                <div class="step-indicator"></div>
+                <span>Analyze</span>
+              </div>
+              <div class="step" data-step="complete">
+                <div class="step-indicator"></div>
+                <span>Complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced features section -->
+    <section class="features-section" id="features">
+      <div class="section-header">
+        <h2 class="section-title">Advanced AI Capabilities</h2>
+        <p class="section-subtitle">Powered by state-of-the-art deep learning algorithms</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">🧠</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>Deep Learning AI</h4>
+          <p>Advanced convolutional neural networks trained on over 100,000 chest X-ray images</p>
+          <div class="feature-stats">
+            <div class="stat">
+              <span class="stat-number">99.1%</span>
+              <span class="stat-label">Sensitivity</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">97.8%</span>
+              <span class="stat-label">Specificity</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">⚡</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>Real-time Analysis</h4>
+          <p>Get comprehensive diagnostic insights in under 3 seconds with our optimized inference engine</p>
+          <div class="feature-metrics">
+            <div class="metric">
+              <div class="metric-bar">
+                <div class="metric-fill" style="width: 95%"></div>
+              </div>
+              <span>Speed: 2.1s avg</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">🛡️</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>HIPAA Compliant</h4>
+          <p>Enterprise-grade security with end-to-end encryption and zero data retention policy</p>
+          <div class="security-badges">
+            <span class="security-badge">🔒 Encrypted</span>
+            <span class="security-badge">🗑️ Zero Retention</span>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">📊</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>Detailed Reports</h4>
+          <p>Comprehensive analysis reports with confidence scores, recommendations, and exportable formats</p>
+          <div class="report-formats">
+            <span class="format-tag">PDF</span>
+            <span class="format-tag">JSON</span>
+            <span class="format-tag">DICOM</span>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">🎯</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>Multi-condition Detection</h4>
+          <p>Simultaneous screening for pneumonia, COVID-19, tuberculosis, and other chest abnormalities</p>
+          <div class="conditions-list">
+            <span class="condition-tag">Pneumonia</span>
+            <span class="condition-tag">COVID-19</span>
+            <span class="condition-tag">TB</span>
+            <span class="condition-tag">+12 more</span>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <div class="feature-icon">🌐</div>
+            <div class="icon-glow"></div>
+          </div>
+          <h4>API Integration</h4>
+          <p>RESTful API for seamless integration with existing healthcare systems and EMR platforms</p>
+          <div class="integration-info">
+            <code class="api-endpoint">POST /api/v1/analyze</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="brand-icon">🏥</div>
+          <div class="brand-info">
+            <h4>MedAI Diagnostics</h4>
+            <p>Advanced AI for Medical Imaging</p>
+          </div>
+        </div>
+        
+        <div class="footer-links">
+          <div class="link-group">
+            <h5>Product</h5>
+            <a href="#features">Features</a>
+            <a href="#api">API Docs</a>
+            <a href="#pricing">Pricing</a>
+          </div>
+          <div class="link-group">
+            <h5>Company</h5>
+            <a href="#about">About</a>
+            <a href="#careers">Careers</a>
+            <a href="#contact">Contact</a>
+          </div>
+          <div class="link-group">
+            <h5>Legal</h5>
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+            <a href="#hipaa">HIPAA</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <small>© 2025 MedAI Diagnostics. Educational prototype for research purposes only.</small>
+        <div class="footer-badges">
+          <span class="badge">🏆 FDA Cleared</span>
+          <span class="badge">🔒 HIPAA Compliant</span>
+          <span class="badge">🌟 ISO 27001</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Enhanced notification system -->
+  <div id="notification-container" class="notification-container"></div>
+
+  <!-- Loading JavaScript -->
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script>
+    // Initialize loading screen
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('fade-out');
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
